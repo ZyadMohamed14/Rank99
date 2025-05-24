@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:rank99/player_model.dart';
 import 'package:rank99/player_repo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'players_state.dart';
 
@@ -84,7 +85,54 @@ class PlayersCubit extends Cubit<PlayersState> {
     emit(PlayersLoaded(currentState.players, selectedPlayers));
     return message;
   }
+  void refreshPlayers() async {
+    try {
+      emit(PlayersLoading());
+      allPlayers = await repository.getPlayers();
+      emit(PlayersLoaded(allPlayers, selectedPlayers));
+    } catch (e) {
+      emit(PlayersError('Failed to refresh players'));
+    }
+  }
+  Future<void> incrementSelections(String playerId) async {
+    if (state is! PlayersLoaded) return;
 
+    final currentState = state as PlayersLoaded;
+
+    // Update local state immediately for responsiveness
+    final updatedPlayers = currentState.players.map((p) {
+      if (p.playerId == playerId) {
+        return Player(
+          playerId: p.playerId,
+          rank: p.rank,
+          imSrc: p.imSrc,
+          name: p.name,
+          nameLink: p.nameLink,
+          age: p.age,
+          origin: p.origin,
+          club: p.club,
+          selections: p.selections + 1,
+        );
+      }
+      return p;
+    }).toList();
+
+    emit(PlayersLoaded(updatedPlayers, currentState.selected));
+
+    // Update in Supabase
+    try {
+      await Supabase.instance.client
+          .from('players')
+          .update({'selections': currentState.players
+          .firstWhere((p) => p.playerId == playerId)
+          .selections + 1})
+          .eq('player_id', playerId);
+    } catch (e) {
+      // Revert if Supabase update fails
+      emit(PlayersLoaded(currentState.players, currentState.selected));
+      throw e;
+    }
+  }
   Future<void> removeFavorite(Player player) async {
     final selected = List<Player>.from(selectedPlayers);
     selected.removeWhere((p) => p.playerId == player.playerId);

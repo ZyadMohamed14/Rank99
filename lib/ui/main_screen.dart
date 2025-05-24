@@ -8,6 +8,7 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../player_model.dart';
 import '../players_cubit.dart';
@@ -494,6 +495,39 @@ Origin: ${player.origin} | Club: ${player.club}
       );
     }
   }
+  Future<void> _voteForPlayer(BuildContext context) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // Use Cubit to handle the vote
+      await context.read<PlayersCubit>().incrementSelections(player.playerId);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Voted for ${player.name}! Total votes: ${player.selections + 1}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to vote: ${e.toString()}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (context.mounted) Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -583,10 +617,34 @@ Origin: ${player.origin} | Club: ${player.club}
             top: 50,
             left: 8,
             child: IconButton(
-              icon: const Icon(Icons.share, color: Colors.blue),
+              icon: const Icon(Icons.share, color: Colors.black),
               onPressed: () => _showShareOptions(context),
             ),
           ),
+          /// vote button
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: IconButton(
+              icon: const Icon(Icons.thumb_up, color: Colors.blue),
+              onPressed: () => _voteForPlayer(context),
+              tooltip: 'Vote for this player',
+            ),
+          ),
+          // Positioned(
+          //   bottom: 8,
+          //   right: 8,
+          //   child: Column(
+          //     children: [
+          //       IconButton(
+          //         icon: const Icon(Icons.thumb_up),
+          //         color: Colors.blue,
+          //         onPressed: () => _voteForPlayer(context),
+          //       ),
+          //       Text('${player.selections}', style: TextStyle(color: Colors.blue)),
+          //     ],
+          //   ),
+          //),
         ],
       ),
     );
