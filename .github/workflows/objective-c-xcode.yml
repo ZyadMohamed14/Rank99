@@ -24,7 +24,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-         flutter-version: '3.32.0'
+        flutter-version: '3.32.0'
         channel: 'stable'
 
     - name: Get dependencies
@@ -65,7 +65,7 @@ jobs:
         mkdir -p Payload
         cp -r Runner.app Payload/
         zip -r app-appzite.ipa Payload/
-
+        
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
