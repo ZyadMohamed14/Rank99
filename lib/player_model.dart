@@ -5,9 +5,9 @@ class Player {
   final String name;
   final String nameLink;
   final int age;
-  final String origin;
+  final String country;
   final String club;
-  final int selections;
+   int selections;
 
   Player({
     required this.playerId,
@@ -16,7 +16,7 @@ class Player {
     required this.name,
     required this.nameLink,
     required this.age,
-    required this.origin,
+    required this.country,
     required this.club,
     required this.selections,
   });
@@ -29,9 +29,9 @@ class Player {
       'im_src': imSrc,
       'name': name,
       'name_link': nameLink,
-      'Age': age,  // Note: PascalCase to match your Supabase columns
-      'Origin': origin,
-      'Club': club,
+      'age': age,             // ✅ lowercase
+      'country': country,      // ✅ correct
+      'club': club,           // ✅ lowercase
       'selections': selections,
     };
   }
@@ -44,16 +44,28 @@ class Player {
       imSrc: json['im_src']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown Player',
       nameLink: json['name_link']?.toString() ?? '',
-      age: (json['Age'] as num?)?.toInt() ?? 0,  // PascalCase
-      origin: json['Origin']?.toString() ?? '',  // PascalCase
-      club: json['Club']?.toString() ?? '',      // PascalCase
+      age: (json['age'] as num?)?.toInt() ?? 0,  // PascalCase
+      country: json['country']?.toString() ?? 'Unknown Origin',  // PascalCase
+      club: json['Club']?.toString() ?? 'Unknown Club',      // PascalCase
       selections: (json['selections'] as num?)?.toInt() ?? 0,
     );
   }
 
-  // Optional: Override toString() for debugging
   @override
   String toString() {
-    return 'Player{name: $name, rank: $rank, club: $club}';
+    return 'Player{playerId: $playerId, rank: $rank, imSrc: $imSrc, name: $name, nameLink: $nameLink, age: $age, country: $country, club: $club, selections: $selections}';
   }
+
+  // Optional: Override toString() for debugging
+  // @override
+  // String toString() {
+  //   return 'Player{name: $name, rank: $rank, club: $club}';
+  // }
+
+}
+enum PlayerType {
+  rankers,
+  transfermarkt,
+  fifarank,
+  earank,
 }
