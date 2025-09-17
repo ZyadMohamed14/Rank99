@@ -53,6 +53,7 @@ class Player {
 
   @override
   String toString() {
+
     return 'Player{playerId: $playerId, rank: $rank, imSrc: $imSrc, name: $name, nameLink: $nameLink, age: $age, country: $country, club: $club, selections: $selections}';
   }
 

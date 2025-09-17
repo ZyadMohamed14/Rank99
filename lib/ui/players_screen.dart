@@ -2,6 +2,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rank99/ui/player_cv_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../countries.dart';
@@ -138,84 +139,93 @@ class PlayerCard extends StatelessWidget {
     final code = countryNameToCode[player.country];
     final flag = code != null ? getFlagEmoji(code) : '';
 
-    return Card(
-      child: SingleChildScrollView(
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CachedNetworkImage(
-                  imageUrl: player.imSrc,
-                  fit: BoxFit.cover,
-                  //placeholder: (context, url) => const CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => const Icon(Icons.person, size: 100),
-                  fadeInDuration: const Duration(milliseconds: 200),
-                  fadeOutDuration: const Duration(milliseconds: 100),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FittedBox(child: Text(player.name, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      Text( player.age.toString()),
-                      Text(player.club),
-                      Text(
-                        '${player.country} $flag',
-                        style: TextStyle(fontSize: 10),
-                      ),
-
-                      Text(player.rank.toString()),
-                    ],
+    return GestureDetector(
+      onTap: (){
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PlayerCvScreen( player),
+          ),
+        );
+      },
+      child: Card(
+        child: SingleChildScrollView(
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: player.imSrc,
+                    fit: BoxFit.cover,
+                    //placeholder: (context, url) => const CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => const Icon(Icons.person, size: 100),
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    fadeOutDuration: const Duration(milliseconds: 100),
                   ),
-                ),
-              ],
-            ),
-            // Positioned(
-            //   top: 8,
-            //   right: 8,
-            //   child: CircleAvatar(
-            //     backgroundColor: Colors.blue,
-            //     child: Text('${player.rank}'),
-            //   ),
-            // ),
-            // Positioned(
-            //   bottom: 0,
-            //   left: 8,
-            //   child: Chip(
-            //     label: Text(player.origin),
-            //     backgroundColor: Colors.green.withOpacity(0.8),
-            //   ),
-            // ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: BlocBuilder<PlayersCubit, PlayersState>(
-                builder: (context, state) {
-                  final isSelected = state is PlayersLoaded &&
-                      state.selected.any((p) => p.playerId == player.playerId);
-                  return IconButton(
-                    icon: Icon(
-                      isSelected ? Icons.star : Icons.star_border,
-                      color: Colors.amber,
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FittedBox(child: Text(player.name, style: const TextStyle(fontWeight: FontWeight.bold))),
+                        Text( player.age.toString()),
+                        Text(player.club),
+                        Text(
+                          '${player.country} $flag',
+                          style: TextStyle(fontSize: 10),
+                        ),
+
+                        Text(player.rank.toString()),
+                      ],
                     ),
-                    onPressed: () async {
-                      final message = await context.read<PlayersCubit>().toggleSelection(player);
-                      if (message.isNotEmpty && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(message),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    },
-                  );
-                },
+                  ),
+                ],
               ),
-            ),
-          ],
+              // Positioned(
+              //   top: 8,
+              //   right: 8,
+              //   child: CircleAvatar(
+              //     backgroundColor: Colors.blue,
+              //     child: Text('${player.rank}'),
+              //   ),
+              // ),
+              // Positioned(
+              //   bottom: 0,
+              //   left: 8,
+              //   child: Chip(
+              //     label: Text(player.origin),
+              //     backgroundColor: Colors.green.withOpacity(0.8),
+              //   ),
+              // ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: BlocBuilder<PlayersCubit, PlayersState>(
+                  builder: (context, state) {
+                    final isSelected = state is PlayersLoaded &&
+                        state.selected.any((p) => p.playerId == player.playerId);
+                    return IconButton(
+                      icon: Icon(
+                        isSelected ? Icons.star : Icons.star_border,
+                        color: Colors.amber,
+                      ),
+                      onPressed: () async {
+                        final message = await context.read<PlayersCubit>().toggleSelection(player);
+                        if (message.isNotEmpty && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(message),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
